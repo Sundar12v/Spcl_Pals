@@ -1,132 +1,147 @@
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
-import 'package:flutter_swiper/flutter_swiper.dart';
-import 'package:audioplayers/audio_cache.dart';
+import 'package:card_swiper/card_swiper.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class ElephantPage extends StatefulWidget {
-
   @override
   _ElephantPageState createState() => _ElephantPageState();
 }
 
 class _ElephantPageState extends State<ElephantPage> {
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  final List<Widget> steps = [
+    buildFactCard('Elephants are the world’s \n largest land animals!'),
+    buildFactCard('African elephants have large ears \n shaped like the continent of Africa!'),
+    buildFactCard('There are two species: \n African and Asian elephants.'),
+  ];
+
   @override
   Widget build(BuildContext context) {
-
-    final List<Widget> steps = [
-      _step0(),
-      _step1(),
-      _step2(),
-    ];
-
     return Scaffold(
-      body: Column(
-        children: <Widget>[
-          SizedBox(height: 40,),
-          Row(
-            children: <Widget>[
-              SizedBox(width: 20,),
-              InkWell(
-                onTap: (){
-                  Navigator.pop(context);
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            const SizedBox(height: 10),
+            Row(
+              children: <Widget>[
+                const SizedBox(width: 20),
+                InkWell(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Icon(Icons.arrow_back, size: 30, color: Colors.black54),
+                ),
+                const Spacer(),
+                const LikeButton(size: 30),
+                const SizedBox(width: 20),
+              ],
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Elephant',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 32,
+                fontFamily: 'Nunito',
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Elephant moms usually give birth\n     to just one calf at a time.',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 22,
+                fontFamily: 'Nunito',
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            Image.asset('assets/elephant.png', height: 230, width: 400),
+            const SizedBox(height: 25),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                InkWell(
+                  onTap: () async {
+                    await _audioPlayer.play(AssetSource('elephant.mp3'));
+                  },
+                  child: Container(
+                    width: 70,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: Colors.deepOrangeAccent,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.music_note, color: Colors.white, size: 30),
+                  ),
+                ),
+                const SizedBox(width: 20),
+                const Text(
+                  'Play Sound',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                    fontFamily: 'NunitoSans',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 25),
+            const Text(
+              'An elephant makes a trumpet sound.',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                fontFamily: 'Nunito',
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 25),
+            ConstrainedBox(
+              constraints: BoxConstraints.loose(Size(350, 170)),
+              child: Swiper(
+                itemBuilder: (BuildContext context, int index) {
+                  return steps[index];
                 },
-                child: Icon(Icons.arrow_back, size: 35, color: Colors.black54,),
-              ),
-              SizedBox(width: 285,),
-              LikeButton(size: 35,),
-            ],
-          ),
-          SizedBox(height: 25,),
-          Text('Elephant', style: TextStyle(
-              color: Colors.black, fontWeight: FontWeight.bold, fontSize: 35, fontFamily: 'Nunito'
-          ),),
-          SizedBox(height: 10,),
-          Text('Elephant moms give birth \n    to only a single child.', style: TextStyle(
-              color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24, fontFamily: 'Nunito'
-          ),),
-          SizedBox(height: 20,),
-          Container(
-            child: Image(image: AssetImage('assets/elephant.png'),height: 250, width: 420,),
-          ),
-          SizedBox(height: 25,),
-          Row(children: <Widget>[
-            SizedBox(width: 50,),
-            InkWell(
-              onTap: (){
-                plyr.play('elephant.mp3');
-              },
-              child: Container(
-                width: 70,
-                height: 50,
-                color: Colors.deepOrangeAccent,
-                child: Icon(Icons.music_note, color: Colors.white, size: 36,),
+                itemCount: steps.length,
+                itemHeight: 170,
+                itemWidth: 350,
+                layout: SwiperLayout.TINDER,
+                control: SwiperControl(color: Colors.black),
+                pagination: const SwiperPagination(),
               ),
             ),
-            SizedBox(width: 70,),
-            Text(
-              'Play Sound',style: TextStyle(
-                color: Colors.black, fontWeight: FontWeight.bold, fontSize: 30, fontFamily: 'NunitoSans'
-            ),
-            ),
-          ],),
-          SizedBox(height: 25,),
-          Text(
-            'An elephant makes a trumpet sound.',style: TextStyle(
-              color: Colors.black, fontWeight: FontWeight.bold, fontSize: 22, fontFamily: 'Nunito'
-          ),
-          ),
-          SizedBox(height: 25,),
-          ConstrainedBox(
-            constraints: BoxConstraints.loose(Size(350, 170)),
-            child: Swiper(
-              itemBuilder: (BuildContext context, int index) {
-                return steps[index];
-              },
-              itemCount: 3,
-              itemHeight: 170,
-              itemWidth: 350,
-              layout: SwiperLayout.TINDER,
-              control: SwiperControl(color: Colors.black),
-              pagination: SwiperPagination(),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
-Widget _step0(){
+Widget buildFactCard(String text) {
   return Container(
     height: 170,
     width: 350,
-    color: Colors.deepOrangeAccent[100],
-    child:  Center(
-      child: Text('Elephants are the world’s \n largest land animal!', style: TextStyle( fontWeight: FontWeight.w600,fontFamily: 'NunitoSans', fontSize: 18),),
+    decoration: BoxDecoration(
+      color: Colors.deepOrangeAccent[100],
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Center(
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontWeight: FontWeight.w600,
+          fontFamily: 'NunitoSans',
+          fontSize: 18,
+        ),
+        textAlign: TextAlign.center,
+      ),
     ),
   );
 }
-
-Widget _step1(){
-  return Container(
-    height: 170,
-    width: 350,
-    color: Colors.deepOrangeAccent[100],
-    child:  Center(
-      child: Text('African elephants have large ears \n shaped like the continent of Africa!', style: TextStyle(fontWeight: FontWeight.w600,fontFamily: 'NunitoSans', fontSize: 18),),
-    ),
-  );
-}
-
-Widget _step2(){
-  return Container(
-    height: 170,
-    width: 350,
-    color: Colors.deepOrangeAccent[100],
-    child:  Center(
-      child: Text(' The African elephant and the Asian \n elephant are the two types of \n elephant species.', style: TextStyle(fontWeight: FontWeight.w600,fontFamily: 'NunitoSans', fontSize: 18),),
-    ),
-  );
-}
-
-AudioCache plyr = AudioCache();

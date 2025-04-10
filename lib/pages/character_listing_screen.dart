@@ -1,25 +1,33 @@
+import 'package:flutter/material.dart';
 import 'package:special_pals/models/character.dart';
 import 'package:special_pals/styleguide.dart';
 import 'package:special_pals/widgets/character_widget.dart';
-import 'package:flutter/material.dart';
 
 class CharacterListingScreen extends StatefulWidget {
+  const CharacterListingScreen({Key? key}) : super(key: key);
+
   @override
   _CharacterListingScreenState createState() => _CharacterListingScreenState();
 }
 
 class _CharacterListingScreenState extends State<CharacterListingScreen> {
-  PageController _pageController;
+  late PageController _pageController;
   int currentPage = 0;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(
-        viewportFraction: 1.0,
-        initialPage: currentPage,
-        keepPage: false
+      viewportFraction: 1.0,
+      initialPage: currentPage,
+      keepPage: false,
     );
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose(); // Always dispose controllers
+    super.dispose();
   }
 
   @override
@@ -27,18 +35,12 @@ class _CharacterListingScreenState extends State<CharacterListingScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        leading: InkWell(child: Icon(
-            Icons.arrow_back,size: 28),
-          onTap: (){
-          Navigator.of(context).pop();
-          },
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, size: 28),
+          onPressed: () => Navigator.of(context).pop(),
         ),
-        backgroundColor: Color(0xFFFF977C),
-        actions: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-          ),
-        ],
+        backgroundColor: const Color(0xFFFF977C),
+        elevation: 0,
       ),
       body: SafeArea(
         child: Padding(
@@ -46,27 +48,31 @@ class _CharacterListingScreenState extends State<CharacterListingScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               Padding(
                 padding: const EdgeInsets.only(left: 32.0, top: 8.0),
                 child: RichText(
                   text: TextSpan(
                     children: [
                       TextSpan(text: "Hi, I'm Jack.", style: AppTheme.display1),
-                      TextSpan(text: "\n"),
-                      TextSpan(text: "Meet Bevis! ->", style: AppTheme.display2),
+                      const TextSpan(text: "\n"),
+                      TextSpan(text: "Meet Bevis! →", style: AppTheme.display2),
                     ],
                   ),
                 ),
               ),
+              const SizedBox(height: 20),
               Expanded(
-                child: PageView(
-                  physics: ClampingScrollPhysics(),
+                child: PageView.builder(
                   controller: _pageController,
-                  children: <Widget>[
-                    for (var i = 0; i<characters.length;i++)
-                      CharacterWidget(character: characters[i], pageController: _pageController, currentPage: i)
-                  ],
+                  itemCount: characters.length,
+                  itemBuilder: (context, index) {
+                    return CharacterWidget(
+                      character: characters[index],
+                      pageController: _pageController,
+                      currentPage: index,
+                    );
+                  },
                 ),
               ),
             ],

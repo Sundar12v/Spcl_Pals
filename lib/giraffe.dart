@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
-import 'package:flutter_swiper/flutter_swiper.dart';
-import 'package:audioplayers/audio_cache.dart';
+import 'package:card_swiper/card_swiper.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class GiraffePage extends StatefulWidget {
 
@@ -52,9 +52,9 @@ class _GiraffePageState extends State<GiraffePage> {
           Row(children: <Widget>[
             SizedBox(width: 50,),
             InkWell(
-              onTap: (){
-                plyr.play('Giraffe.mp3');
-              },
+              onTap: () async {
+                  await _audioPlayer.play(AssetSource('Giraffe.mp3'));
+                },
               child: Container(
                 width: 70,
                 height: 50,
@@ -129,4 +129,4 @@ Widget _step2(){
   );
 }
 
-AudioCache plyr = AudioCache();
+final AudioPlayer _audioPlayer = AudioPlayer();

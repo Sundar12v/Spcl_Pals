@@ -1,148 +1,137 @@
 import 'package:flutter/material.dart';
 import 'data.dart';
 import 'page_indicator.dart';
-import 'package:gradient_text/gradient_text.dart';
 import 'dashboard.dart';
 
 class JackPage extends StatefulWidget {
-
   @override
   _JackPageState createState() => _JackPageState();
 }
 
 class _JackPageState extends State<JackPage> with TickerProviderStateMixin {
-  PageController _controller;
+  late PageController _controller;
   int currentPage = 0;
   bool lastPage = false;
-  AnimationController animationController;
-  Animation<double> _scaleAnimation;
+  late AnimationController animationController;
+  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
-    _controller = PageController(
-      initialPage: currentPage,
+    _controller = PageController(initialPage: currentPage);
+    animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
     );
-    animationController =
-        AnimationController(duration: Duration(milliseconds: 300), vsync: this);
     _scaleAnimation = Tween(begin: 0.6, end: 1.0).animate(animationController);
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    animationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
-            colors: [Color(0xFF485563), Color(0xFF29323C)],
-            tileMode: TileMode.clamp,
-            begin: Alignment.topCenter,
-            stops: [0.0, 1.0],
-            end: Alignment.bottomCenter),
+          colors: [Color(0xFF485563), Color(0xFF29323C)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          stops: [0.0, 1.0],
+        ),
       ),
       child: Scaffold(
-        backgroundColor: Color(0xFFDF4161),
-        body: new Stack(
+        backgroundColor: const Color(0xFFDF4161),
+        body: Stack(
           fit: StackFit.expand,
-          children: <Widget>[
+          children: [
             PageView.builder(
               itemCount: pageList.length,
               controller: _controller,
               onPageChanged: (index) {
                 setState(() {
                   currentPage = index;
-                  if (currentPage == pageList.length - 1) {
-                    lastPage = true;
-                    animationController.forward();
-                  } else {
-                    lastPage = false;
-                    animationController.reset();
-                  }
-                  print(lastPage);
+                  lastPage = currentPage == pageList.length - 1;
+                  lastPage
+                      ? animationController.forward()
+                      : animationController.reset();
                 });
               },
               itemBuilder: (context, index) {
-                return AnimatedBuilder(
-                  animation: _controller,
-                  builder: (context, child) {
-                    var page = pageList[index];
-                    var delta;
-                    var y = 1.0;
+                var page = pageList[index];
+                var y = 1.0;
 
-                    if (_controller.position.haveDimensions) {
-                      delta = _controller.page - index;
-                      y = 1 - delta.abs().clamp(0.0, 1.0);
-                    }
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Image.asset(page.imageUrl),
-                        SizedBox(height: 3),
-                        Container(
-                          margin: EdgeInsets.only(left: 12.0),
-                          height: 120.0,
-                          child: Stack(
-                            children: <Widget>[
-                              Opacity(
-                                opacity: .10,
-                                child: GradientText(
-                                  page.title,
-                                  gradient: LinearGradient(
-                                      colors: pageList[index].titleGradient),
-                                  style: TextStyle(
-                                      fontSize: 85.0,
-                                      fontFamily: "Nunito",
-                                      letterSpacing: 1.0),
-                                ),
+                if (_controller.position.haveDimensions) {
+                  final delta = _controller.page! - index;
+                  y = 1 - delta.abs().clamp(0.0, 1.0);
+                }
+
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Image.asset(page.imageUrl),
+                    const SizedBox(height: 3),
+                    Container(
+                      margin: const EdgeInsets.only(left: 12.0),
+                      height: 120.0,
+                      child: Stack(
+                        children: [
+                          Opacity(
+                            opacity: .10,
+                            child: GradientText(
+                              text: page.title,
+                              gradient: LinearGradient(colors: page.titleGradient),
+                              style: const TextStyle(
+                                fontSize: 85.0,
+                                fontFamily: "Nunito",
+                                letterSpacing: 1.0,
                               ),
-                              Padding(
-                                padding: EdgeInsets.only(top: 30.0, left: 22.0),
-                                child: GradientText(
-                                  page.title,
-                                  gradient: LinearGradient(
-                                      colors: pageList[index].titleGradient),
-                                  style: TextStyle(
-                                    fontSize: 60.0,
-                                    fontFamily: "Nunito",
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 34.0, top: 12.0),
-                          child: Transform(
-                            transform:
-                            Matrix4.translationValues(0, 50.0 * (1 - y), 0),
-                            child: Text(
-                              page.body,
-                              style: TextStyle(
-                                  fontSize: 18.0,
-                                  fontFamily: "NunitoSans",
-                                  color: Colors.white),
                             ),
                           ),
-                        )
-                      ],
-                    );
-                  },
+                          Padding(
+                            padding: const EdgeInsets.only(top: 30.0, left: 22.0),
+                            child: GradientText(
+                              text: page.title,
+                              gradient: LinearGradient(colors: page.titleGradient),
+                              style: const TextStyle(
+                                fontSize: 60.0,
+                                fontFamily: "Nunito",
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 34.0, top: 12.0),
+                      child: Transform(
+                        transform: Matrix4.translationValues(0, 50.0 * (1 - y), 0),
+                        child: Text(
+                          page.body,
+                          style: const TextStyle(
+                            fontSize: 18.0,
+                            fontFamily: "NunitoSans",
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
             Positioned(
               left: 30.0,
               bottom: 55.0,
-              child: Container(
-                  width: 160.0,
-                  child: PageIndicator(currentPage, pageList.length)),
+              child: SizedBox(
+                width: 160.0,
+                child: PageIndicator(currentPage, pageList.length),
+              ),
             ),
             Positioned(
               right: 30.0,
@@ -151,20 +140,47 @@ class _JackPageState extends State<JackPage> with TickerProviderStateMixin {
                 scale: _scaleAnimation,
                 child: lastPage
                     ? FloatingActionButton(
-                  backgroundColor: Colors.white,
-                  child: Icon(
-                    Icons.arrow_forward,
-                    color: Colors.black,
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => DashboardPage()));
-                  },
-                )
-                    : Container(),
+                        backgroundColor: Colors.white,
+                        child: const Icon(Icons.arrow_forward, color: Colors.black),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => DashboardPage()),
+                          );
+                        },
+                      )
+                    : const SizedBox.shrink(),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// ✅ Custom GradientText Widget (you can move this to a separate file)
+class GradientText extends StatelessWidget {
+  final String text;
+  final TextStyle style;
+  final Gradient gradient;
+
+  const GradientText({
+    Key? key,
+    required this.text,
+    required this.gradient,
+    required this.style,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      blendMode: BlendMode.srcIn,
+      shaderCallback: (bounds) =>
+          gradient.createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
+      child: Text(
+        text,
+        style: style,
       ),
     );
   }

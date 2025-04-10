@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'package:audioplayers/audio_cache.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class ColorGameTwo extends StatefulWidget {
-  ColorGameTwo({Key key}) : super(key: key);
+  const ColorGameTwo({super.key});
 
-  createState() => ColorGameTwoState();
+  @override
+  ColorGameTwoState createState() => ColorGameTwoState();
 }
 
 class ColorGameTwoState extends State<ColorGameTwo> {
-  /// Map to keep track of score
   final Map<String, bool> score = {};
 
-  /// Choices for game
-  final Map choices = {
+  final Map<String, Color?> choices = {
     '🦁': Colors.yellow[600],
     '🐯': Colors.orangeAccent[700],
     '🐷': Colors.pink[100],
@@ -21,19 +20,28 @@ class ColorGameTwoState extends State<ColorGameTwo> {
     '🐸': Colors.green,
   };
 
-  // Random seed to shuffle order of items.
   int seed = 0;
+
+  final AudioPlayer _player = AudioPlayer();
+
+  Future<void> playCorrectSound() async {
+    await _player.play(AssetSource('Bell.mp3'));
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text('            Score ${score.length} / 5',
-            style: TextStyle(fontSize: 22, fontFamily: 'Nunito', fontWeight: FontWeight.w500 ),),
-          backgroundColor: Colors.redAccent),
+        title: Text(
+          '            Score ${score.length} / 5',
+          style: const TextStyle(
+              fontSize: 22, fontFamily: 'Nunito', fontWeight: FontWeight.w500),
+        ),
+        backgroundColor: Colors.redAccent,
+      ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.redAccent,
-        child: Icon(Icons.refresh),
+        child: const Icon(Icons.refresh),
         onPressed: () {
           setState(() {
             score.clear();
@@ -45,54 +53,71 @@ class ColorGameTwoState extends State<ColorGameTwo> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: choices.keys.map((emoji) {
-                return Draggable<String>(
-                  data: emoji,
-                  child: Emoji(emoji: score[emoji] == true ? '✅' : emoji),
-                  feedback: Emoji(emoji: emoji),
-                  childWhenDragging: Emoji(emoji: ''),
-                );
-              }).toList()),
-          SizedBox(width: 20),
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: choices.keys.map((emoji) {
+              return Draggable<String>(
+                data: emoji,
+                child: Emoji(emoji: score[emoji] == true ? '✅' : emoji),
+                feedback: Emoji(emoji: emoji),
+                childWhenDragging: const Emoji(emoji: ''),
+              );
+            }).toList(),
+          ),
+          const SizedBox(width: 20),
           Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.start,
             children:
-            choices.keys.map((emoji) => _buildDragTarget(emoji)).toList()
-              ..shuffle(Random(seed)),
-          )
+                choices.keys.map((emoji) => _buildDragTarget(emoji)).toList()
+                  ..shuffle(Random(seed)),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildDragTarget(emoji) {
+  Widget _buildDragTarget(String emoji) {
     return DragTarget<String>(
-      builder: (BuildContext context, List<String> incoming, List rejected) {
+      builder: (BuildContext context, List<String?> incoming, List<dynamic> rejected) {
         if (score[emoji] == true) {
           return ClipRRect(
-            borderRadius: BorderRadius.circular(35),child: Container(
-            color: Colors.transparent,
-            child: Text('Correct!', style: TextStyle(fontSize: 22, fontFamily: 'Nunito', fontWeight: FontWeight.w500 , color: Colors.black),),
-            alignment: Alignment.center,
-            height: 80,
-            width: 140,
-          ),
+            borderRadius: BorderRadius.circular(35),
+            child: Container(
+              color: Colors.transparent,
+              alignment: Alignment.center,
+              height: 80,
+              width: 140,
+              child: const Text(
+                'Correct!',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontFamily: 'Nunito',
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                ),
+              ),
+            ),
           );
         } else {
           return ClipRRect(
-            borderRadius: BorderRadius.circular(35), child: Container(color: choices[emoji], height: 80, width: 150),
+            borderRadius: BorderRadius.circular(35),
+            child: Container(
+              color: choices[emoji],
+              height: 80,
+              width: 150,
+            ),
           );
         }
       },
-      onWillAccept: (data) => data == emoji,
-      onAccept: (data) {
+      onWillAcceptWithDetails: (DragTargetDetails<String> details) {
+        return details.data == emoji;
+      },
+      onAcceptWithDetails: (DragTargetDetails<String> details) {
         setState(() {
           score[emoji] = true;
-          plyr.play('Bell.mp3');
         });
+        playCorrectSound();
       },
       onLeave: (data) {},
     );
@@ -100,7 +125,7 @@ class ColorGameTwoState extends State<ColorGameTwo> {
 }
 
 class Emoji extends StatelessWidget {
-  Emoji({Key key, this.emoji}) : super(key: key);
+  const Emoji({super.key, required this.emoji});
 
   final String emoji;
 
@@ -113,17 +138,15 @@ class Emoji extends StatelessWidget {
           Container(
             alignment: Alignment.center,
             height: 90,
-            padding: EdgeInsets.all(10),
+            padding: const EdgeInsets.all(10),
             child: Text(
               emoji,
-              style: TextStyle(color: Colors.black, fontSize: 50),
+              style: const TextStyle(color: Colors.black, fontSize: 50),
             ),
           ),
-          SizedBox(height: 10,),
+          const SizedBox(height: 10),
         ],
       ),
     );
   }
 }
-
-AudioCache plyr = AudioCache();
